@@ -1,0 +1,20 @@
+# Databricks Configuration
+DATABRICKS_HOST=https://your-workspace.cloud.databricks.com
+DATABRICKS_TOKEN=your-personal-access-token
+GENIE_SPACE_ID=your-genie-space-id
+
+# Azure OpenAI Configuration (alternative to regular OpenAI)
+AZURE_OPENAI_ENDPOINT=https://your-resource-name.openai.azure.com/
+AZURE_OPENAI_API_KEY=your-azure-openai-api-key
+AZURE_OPENAI_DEPLOYMENT=your-deployment-name
+AZURE_OPENAI_API_VERSION=2024-02-01
+
+# Optional - Rate limiting configuration
+MAX_RETRIES=5
+INITIAL_BACKOFF=1.0
+MAX_BACKOFF=60.0
+BACKOFF_MULTIPLIER=2.0
+
+# Optional - Logging level
+LOG_LEVEL=INFO
+
