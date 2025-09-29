@@ -1,5 +1,67 @@
 // Type definitions for the Genie to Chart POC
 
+// ===== CONVERSATIONAL INTERFACE TYPES =====
+
+// Message types for conversational interface
+export interface Message {
+  id: string;
+  conversation_id: string;
+  type: 'user' | 'assistant_text' | 'assistant_chart' | 'assistant_error';
+  content: string;
+  timestamp: string;
+  metadata?: {
+    chart_config?: any;
+    ai_summary?: string;
+    chart_reasoning?: string;
+    chart_type?: string;
+    sql_query?: string;
+    data?: any[];
+    columns?: string[];
+    response_type?: 'chart' | 'text';
+    is_mock_data?: boolean;
+    error?: string;
+  };
+}
+
+export interface Conversation {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+  messages: Message[];
+  message_count: number;
+  is_active: boolean;
+}
+
+export interface ConversationSummary {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+  message_count: number;
+  is_active: boolean;
+}
+
+// API Response types for conversations
+export interface ConversationResponse {
+  success: boolean;
+  conversation_id: string;
+  user_message_id: string;
+  assistant_message_id: string;
+  response_type: 'chart' | 'text';
+  content: string;
+  chart_config?: any;
+  ai_summary?: string;
+  chart_reasoning?: string;
+  chart_type?: string;
+  sql_query?: string;
+  data?: any[];
+  columns?: string[];
+  is_mock_data?: boolean;
+}
+
+// ===== LEGACY TYPES (for backwards compatibility) =====
+
 // Base interface for all Genie responses
 export interface BaseGenieResponse {
   success: boolean;
@@ -42,6 +104,28 @@ export interface ApiError {
   success: false;
 }
 
+// ===== COMPONENT PROP TYPES =====
+
+export interface ConversationListProps {
+  conversations: ConversationSummary[];
+  activeConversationId: string | null;
+  onSelectConversation: (conversationId: string) => void;
+  onNewConversation: () => void;
+  onDeleteConversation: (conversationId: string) => void;
+  loading?: boolean;
+}
+
+export interface ChatMessageProps {
+  message: Message;
+  isLatest?: boolean;
+}
+
+export interface ChatInterfaceProps {
+  conversation: Conversation | null;
+  onSendMessage: (message: string) => void;
+  loading: boolean;
+}
+
 export interface ChartComponentProps {
   data: GenieChartResult;
   showDetailsToggle?: boolean;
@@ -60,6 +144,7 @@ export interface ChartComponentProps {
 export interface QueryFormProps {
   onQuery: (question: string) => void;
   loading: boolean;
+  conversationMode?: boolean;
 }
 
 export interface ExampleQuestion {

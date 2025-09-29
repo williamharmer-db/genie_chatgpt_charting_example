@@ -14,6 +14,135 @@ class VisualizationEngine:
     def __init__(self):
         pass
     
+    def create_chart_config(self, data: List[List[Any]], columns: List[str], chart_type: str, title: str) -> Dict[str, Any]:
+        """Create a chart configuration from raw data for the conversational interface"""
+        try:
+            # Convert raw data to the format expected by Chart.js
+            if not data or not columns:
+                raise ValueError("No data or columns provided")
+            
+            # Simple conversion for the most common case: first column is labels, second is values
+            chart_data = []
+            if len(columns) >= 2:
+                for row in data:
+                    if len(row) >= 2:
+                        chart_data.append({
+                            "label": str(row[0]) if row[0] is not None else "Unknown",
+                            "value": float(row[1]) if isinstance(row[1], (int, float, str)) and str(row[1]).replace('.', '').replace('-', '').isdigit() else 0
+                        })
+            else:
+                # Single column data - use index as label
+                for i, row in enumerate(data):
+                    if row:
+                        chart_data.append({
+                            "label": f"Item {i+1}",
+                            "value": float(row[0]) if isinstance(row[0], (int, float, str)) and str(row[0]).replace('.', '').replace('-', '').isdigit() else 0
+                        })
+            
+            # Create a simple chart configuration directly for Chart.js
+            if chart_type.lower() in ["pie", "doughnut"]:
+                labels = [item["label"] for item in chart_data]
+                values = [item["value"] for item in chart_data]
+                
+                return {
+                    "type": chart_type.lower(),
+                    "data": {
+                        "labels": labels,
+                        "datasets": [{
+                            "data": values,
+                            "backgroundColor": [
+                                "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF",
+                                "#FF9F40", "#FF6384", "#C9CBCF", "#4BC0C0", "#FF6384"
+                            ][:len(values)],
+                            "borderWidth": 1
+                        }]
+                    },
+                    "options": {
+                        "responsive": True,
+                        "plugins": {
+                            "title": {
+                                "display": True,
+                                "text": title
+                            },
+                            "legend": {
+                                "display": True,
+                                "position": "bottom"
+                            }
+                        }
+                    }
+                }
+            else:
+                # Bar or line chart
+                labels = [item["label"] for item in chart_data]
+                values = [item["value"] for item in chart_data]
+                
+                return {
+                    "type": chart_type.lower() if chart_type.lower() in ["bar", "line"] else "bar",
+                    "data": {
+                        "labels": labels,
+                        "datasets": [{
+                            "label": columns[1] if len(columns) > 1 else "Value",
+                            "data": values,
+                            "backgroundColor": "#36A2EB",
+                            "borderColor": "#36A2EB",
+                            "borderWidth": 1,
+                            "fill": False if chart_type.lower() == "line" else True
+                        }]
+                    },
+                    "options": {
+                        "responsive": True,
+                        "plugins": {
+                            "title": {
+                                "display": True,
+                                "text": title
+                            },
+                            "legend": {
+                                "display": True
+                            }
+                        },
+                        "scales": {
+                            "x": {
+                                "display": True,
+                                "title": {
+                                    "display": True,
+                                    "text": columns[0] if columns else "Category"
+                                }
+                            },
+                            "y": {
+                                "display": True,
+                                "title": {
+                                    "display": True,
+                                    "text": columns[1] if len(columns) > 1 else "Value"
+                                }
+                            }
+                        }
+                    }
+                }
+                
+        except Exception as e:
+            logger.error(f"Failed to create chart config: {e}")
+            # Return a basic fallback configuration
+            return {
+                "type": "bar",
+                "data": {
+                    "labels": ["No Data"],
+                    "datasets": [{
+                        "label": "No Data",
+                        "data": [0],
+                        "backgroundColor": "#FF6384"
+                    }]
+                },
+                "options": {
+                    "responsive": True,
+                    "plugins": {
+                        "title": {
+                            "display": True,
+                            "text": "No Data Available"
+                        }
+                    }
+                }
+            }
+    
     def generate_chartjs_config(self, spec: ChartSpecification) -> Dict[str, Any]:
         """Generate a complete Chart.js configuration from a chart specification"""
         try:

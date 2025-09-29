@@ -1,34 +1,132 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import QueryForm from './components/QueryForm';
-import ChartDisplay from './components/ChartDisplay';
-import TextDisplay from './components/TextDisplay';
-import LoadingSpinner from './components/LoadingSpinner';
-import ErrorDisplay from './components/ErrorDisplay';
-import { GenieQueryResult, GenieChartResult, GenieTextResult, ApiError } from './types';
+import ConversationList from './components/ConversationList';
+import ChatInterface from './components/ChatInterface';
+import { Conversation, ConversationSummary } from './types';
 import './App.css';
 
-const App: React.FC = () => {
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<GenieQueryResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [currentQuestion, setCurrentQuestion] = useState<string>('');
+// Configure axios to include credentials for session management
+axios.defaults.withCredentials = true;
 
-  const handleQuery = async (question: string) => {
-    setLoading(true);
-    setError(null);
-    setData(null);
-    setCurrentQuestion(question);
+const App: React.FC = () => {
+  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
+  const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
+  const [conversationLoadingStates, setConversationLoadingStates] = useState<Record<string, boolean>>({});
+  const [conversationsLoading, setConversationsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load conversations on app start
+  useEffect(() => {
+    loadConversations();
+  }, []);
+
+  const loadConversations = async () => {
+    try {
+      setConversationsLoading(true);
+      const response = await axios.get('/api/conversations');
+      if (response.data.success) {
+        setConversations(response.data.conversations);
+      }
+    } catch (err: any) {
+      console.error('Failed to load conversations:', err);
+    } finally {
+      setConversationsLoading(false);
+    }
+  };
+
+  const loadConversation = async (conversationId: string) => {
+    try {
+      const response = await axios.get(`/api/conversations/${conversationId}`);
+      if (response.data.success) {
+        setActiveConversation(response.data.conversation);
+        setError(null);
+        
+        // If we got a new conversation ID (due to recovery), update the conversations list
+        if (response.data.new_conversation_id) {
+          await loadConversations();
+        }
+      }
+    } catch (err: any) {
+      setError('Failed to load conversation');
+      console.error('Failed to load conversation:', err);
+    }
+  };
+
+  const createNewConversation = async () => {
+    try {
+      const response = await axios.post('/api/conversations', {});
+      if (response.data.success) {
+        const newConversationId = response.data.conversation_id;
+        
+        // Reload conversations list
+        await loadConversations();
+        
+        // Load the new conversation
+        await loadConversation(newConversationId);
+      }
+    } catch (err: any) {
+      setError('Failed to create new conversation');
+      console.error('Failed to create conversation:', err);
+    }
+  };
+
+  const handleSelectConversation = (conversationId: string) => {
+    if (conversationId !== activeConversation?.id) {
+      loadConversation(conversationId);
+    }
+  };
+
+  const handleDeleteConversation = async (conversationId: string) => {
+    try {
+      const response = await axios.delete(`/api/conversations/${conversationId}`);
+      if (response.data.success) {
+        // Remove from conversations list
+        setConversations(prev => prev.filter(conv => conv.id !== conversationId));
+        
+        // Clean up loading state for this conversation
+        setConversationLoadingStates(prev => {
+          const newState = { ...prev };
+          delete newState[conversationId];
+          return newState;
+        });
+        
+        // If this was the active conversation, clear it
+        if (activeConversation?.id === conversationId) {
+          setActiveConversation(null);
+        }
+      }
+    } catch (err: any) {
+      setError('Failed to delete conversation');
+      console.error('Failed to delete conversation:', err);
+    }
+  };
+
+  const handleSendMessage = async (message: string) => {
+    if (!activeConversation) {
+      setError('No active conversation');
+      return;
+    }
+
+    const conversationId = activeConversation.id;
 
     try {
-      const response = await axios.post<GenieQueryResult | ApiError>('/api/query', {
-        question: question
-      });
+      // Set loading state for this specific conversation
+      setConversationLoadingStates(prev => ({ ...prev, [conversationId]: true }));
+      setError(null);
+
+      // Submit message to queue
+      const response = await axios.post(
+        `/api/conversations/${conversationId}/messages`,
+        { message }
+      );
 
       if (response.data.success) {
-        setData(response.data as GenieQueryResult);
+        const messageId = response.data.message_id;
+        
+        // Poll for message completion
+        await pollForMessageCompletion(messageId, conversationId);
       } else {
-        setError((response.data as ApiError).error);
+        setError('Failed to queue message');
       }
     } catch (err: any) {
       if (err.response?.data?.error) {
@@ -38,28 +136,71 @@ const App: React.FC = () => {
       } else {
         setError('An unexpected error occurred');
       }
-    } finally {
-      setLoading(false);
+      console.error('Failed to send message:', err);
+      // Clear loading state on error
+      setConversationLoadingStates(prev => ({ ...prev, [conversationId]: false }));
     }
   };
 
-  const handleRetry = () => {
-    if (currentQuestion) {
-      handleQuery(currentQuestion);
+  const pollForMessageCompletion = async (messageId: string, conversationId: string) => {
+    const maxAttempts = 60; // Poll for up to 60 seconds
+    const pollInterval = 1000; // Poll every 1 second
+    
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        const statusResponse = await axios.get(`/api/messages/${messageId}/status`);
+        
+        if (statusResponse.data.success) {
+          const status = statusResponse.data.status;
+          
+          if (status === 'completed') {
+            // Message completed successfully
+            await loadConversation(conversationId);
+            await loadConversations();
+            setConversationLoadingStates(prev => ({ ...prev, [conversationId]: false }));
+            return;
+          } else if (status === 'failed') {
+            // Message processing failed
+            const error = statusResponse.data.error || 'Message processing failed';
+            setError(error);
+            setConversationLoadingStates(prev => ({ ...prev, [conversationId]: false }));
+            return;
+          }
+          // If status is 'queued' or 'processing', continue polling
+        }
+        
+        // Wait before next poll
+        await new Promise(resolve => setTimeout(resolve, pollInterval));
+      } catch (err) {
+        console.error('Error polling message status:', err);
+        // Continue polling on error
+        await new Promise(resolve => setTimeout(resolve, pollInterval));
+      }
     }
+    
+    // Timeout reached
+    setError('Message processing timed out. Please try again.');
+    setConversationLoadingStates(prev => ({ ...prev, [conversationId]: false }));
   };
 
   return (
     <div className="app">
-      {/* Sidebar */}
+      {/* Sidebar with conversation list */}
       <aside className="sidebar">
         <div className="sidebar-header">
           <h1>Genie Chat</h1>
-          <p>Ask questions about your data</p>
+          <p>AI-powered data conversations</p>
         </div>
         
         <div className="sidebar-content">
-          <QueryForm onQuery={handleQuery} loading={loading} />
+          <ConversationList
+            conversations={conversations}
+            activeConversationId={activeConversation?.id || null}
+            onSelectConversation={handleSelectConversation}
+            onNewConversation={createNewConversation}
+            onDeleteConversation={handleDeleteConversation}
+            loading={conversationsLoading}
+          />
 
           <div className="workflow-info">
             <h4>⚡ How it works</h4>
@@ -67,22 +208,22 @@ const App: React.FC = () => {
               <div className="workflow-step">
                 <span className="step-number">1</span>
                 <div className="step-content">
-                  <strong>Databricks Genie</strong>
-                  <p>Converts your question to SQL</p>
+                  <strong>Natural Language</strong>
+                  <p>Ask questions in plain English</p>
                 </div>
               </div>
               <div className="workflow-step">
                 <span className="step-number">2</span>
                 <div className="step-content">
-                  <strong>AI Analysis</strong>
-                  <p>GPT-5 recommends best visualization</p>
+                  <strong>Databricks Genie</strong>
+                  <p>Converts to SQL and retrieves data</p>
                 </div>
               </div>
               <div className="workflow-step">
                 <span className="step-number">3</span>
                 <div className="step-content">
-                  <strong>Interactive Charts</strong>
-                  <p>Beautiful react-chartjs-2 visualizations</p>
+                  <strong>AI Analysis</strong>
+                  <p>GPT-5 provides insights and visualizations</p>
                 </div>
               </div>
             </div>
@@ -99,91 +240,30 @@ const App: React.FC = () => {
             </div>
           </div>
         </div>
-
       </aside>
 
-      {/* Main Content Area */}
+      {/* Main chat interface */}
       <main className="main-content">
-        <header className="main-header">
-          <h1>Genie to Chart POC</h1>
-          <p>AI-powered data visualization dashboard</p>
-        </header>
-
-        <div className="content-area">
-          {loading && (
-            <div className="loading-container">
-              <LoadingSpinner />
+        {error && (
+          <div className="global-error">
+            <div className="error-content">
+              <span className="error-icon">⚠️</span>
+              <span className="error-message">{error}</span>
+              <button 
+                className="error-dismiss"
+                onClick={() => setError(null)}
+              >
+                ×
+              </button>
             </div>
-          )}
-          
-          {error && (
-            <div className="error-container">
-              <ErrorDisplay 
-                error={error} 
-                onRetry={currentQuestion ? handleRetry : undefined} 
-              />
-            </div>
-          )}
-          
-          {data && !loading && !error && (
-            <div className="results-container">
-              {data.response_type === 'chart' ? (
-                <>
-                  {/* Question and Chart Results */}
-                  <div className="chart-results-section">
-                    <div className="results-header">
-                      <h2>📈 Results for: "{data.question}"</h2>
-                      {(data as GenieChartResult).is_mock_data && (
-                        <div className="mock-data-badge">
-                          🧪 Demo Data: Using mock data for demonstration
-                        </div>
-                      )}
-                    </div>
-
-                    {/* AI Data Summary */}
-                    <div className="summary-highlight">
-                      <div className="summary-content">
-                        <h3>🧠 Key Insights</h3>
-                        <p className="summary-text">{(data as GenieChartResult).data_summary.ai_summary}</p>
-                      </div>
-                    </div>
-
-                    {/* Chart with expandable details */}
-                    <div className="chart-section">
-                      <ChartDisplay 
-                        data={data as GenieChartResult} 
-                        showDetailsToggle={true}
-                        sqlQuery={(data as GenieChartResult).sql_query}
-                        dataDetails={(data as GenieChartResult).data_summary}
-                        chartReasoning={(data as GenieChartResult).chart_spec.reasoning}
-                        chartType={(data as GenieChartResult).chart_spec.chart_type}
-                        chartLibrary={(data as GenieChartResult).chart_spec.library}
-                      />
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <TextDisplay data={data as GenieTextResult} />
-              )}
-            </div>
-          )}
-
-          {!loading && !error && !data && (
-            <div className="welcome-container">
-              <div className="welcome-content">
-                <h2>Welcome to Genie to Chart POC</h2>
-                <p className="welcome-description">
-                  Transform natural language questions into beautiful, interactive charts using 
-                  Databricks Genie and Azure OpenAI.
-                </p>
-                  <div className="welcome-cta">
-                    <p>👈 <strong>Start by asking a question in the sidebar</strong></p>
-                    <p className="welcome-hint">Click on any example question to get started, or type your own!</p>
-                  </div>
-              </div>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
+        
+        <ChatInterface
+          conversation={activeConversation}
+          onSendMessage={handleSendMessage}
+          loading={activeConversation ? conversationLoadingStates[activeConversation.id] || false : false}
+        />
       </main>
     </div>
   );
