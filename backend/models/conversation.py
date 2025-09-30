@@ -56,6 +56,7 @@ class Conversation:
     updated_at: str
     messages: List[Message]
     is_active: bool = True
+    genie_conversation_id: Optional[str] = None  # Genie's conversation ID for API continuity
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert conversation to dictionary representation."""
@@ -65,6 +66,7 @@ class Conversation:
             'created_at': self.created_at,
             'updated_at': self.updated_at,
             'is_active': self.is_active,
+            'genie_conversation_id': self.genie_conversation_id,
             'messages': [msg.to_dict() for msg in self.messages],
             'message_count': len(self.messages)
         }
@@ -79,6 +81,7 @@ class Conversation:
             created_at=data['created_at'],
             updated_at=data['updated_at'],
             is_active=data.get('is_active', True),
+            genie_conversation_id=data.get('genie_conversation_id'),
             messages=messages
         )
 

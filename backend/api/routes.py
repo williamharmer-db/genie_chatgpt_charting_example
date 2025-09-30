@@ -243,14 +243,21 @@ def process_message(conversation_id: str, session_id: str, user_message: str) ->
         
         logger.info(f"Processing conversational question: {user_message}")
         
-        # Get conversation context for Genie
-        context = conversation_manager.get_context_for_genie(conversation_id, context_limit=3)
-        contextual_question = f"{context}{user_message}" if context else user_message
+        # Get existing Genie conversation ID for continuity
+        genie_conversation_id = conversation_manager.get_genie_conversation_id(conversation_id)
         
-        logger.info("Querying Databricks Genie with context...")
+        if genie_conversation_id:
+            logger.info(f"Continuing Genie conversation: {genie_conversation_id}")
+        else:
+            logger.info("Starting new Genie conversation")
         
-        # Query Genie with context
-        genie_result = genie_client.query_data(contextual_question)
+        # Query Genie with conversation continuity
+        genie_result = genie_client.query_data(user_message, genie_conversation_id)
+        
+        # Store Genie conversation ID for future continuity (if this was a new conversation)
+        if genie_result.conversation_id and not genie_conversation_id:
+            conversation_manager.set_genie_conversation_id(conversation_id, genie_result.conversation_id)
+            logger.info(f"Stored new Genie conversation ID: {genie_result.conversation_id}")
         
         # Process the response based on type
         if genie_result.data and genie_result.columns:

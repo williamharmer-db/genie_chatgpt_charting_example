@@ -324,7 +324,7 @@ genie-to-chart-poc/
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is provided as-is without any license or warranty. Use at your own discretion.
 
 ## 🆘 Troubleshooting
 

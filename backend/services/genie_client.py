@@ -18,6 +18,7 @@ class GenieQueryResult:
     data: List[List[Any]]
     columns: List[str]
     raw_response: str
+    conversation_id: Optional[str] = None  # Genie conversation ID for continuity
 
 
 class GenieClient:
@@ -87,18 +88,38 @@ class GenieClient:
         logger.info(f"Using default space: {spaces[0]['title']} ({default_space_id})")
         return default_space_id
     
-    def query_data(self, question: str) -> GenieQueryResult:
-        """Query data using Genie and return structured results"""
+    def query_data(self, question: str, genie_conversation_id: Optional[str] = None) -> GenieQueryResult:
+        """
+        Query data using Genie and return structured results.
+        
+        Args:
+            question: The user's question
+            genie_conversation_id: Optional Genie conversation ID to continue an existing conversation
+            
+        Returns:
+            GenieQueryResult with data and conversation_id for continuity
+        """
         try:
             # Get space ID
             space_id = self.get_default_space_id()
             
-            # Start conversation with Genie
-            result = self._exponential_backoff(
-                self.workspace_client.genie.start_conversation_and_wait,
-                space_id,
-                question
-            )
+            if genie_conversation_id:
+                # Continue existing conversation
+                logger.info(f"Continuing Genie conversation {genie_conversation_id}")
+                result = self._exponential_backoff(
+                    self.workspace_client.genie.create_message_and_wait,
+                    space_id,
+                    genie_conversation_id,
+                    question
+                )
+            else:
+                # Start new conversation with Genie
+                logger.info("Starting new Genie conversation")
+                result = self._exponential_backoff(
+                    self.workspace_client.genie.start_conversation_and_wait,
+                    space_id,
+                    question
+                )
             
             # Extract SQL query and results
             sql_query = ""
@@ -160,7 +181,8 @@ class GenieClient:
                 sql_query=sql_query,
                 data=data,
                 columns=columns,
-                raw_response=raw_response.strip()
+                raw_response=raw_response.strip(),
+                conversation_id=getattr(result, 'conversation_id', None)
             )
             
         except Exception as e:

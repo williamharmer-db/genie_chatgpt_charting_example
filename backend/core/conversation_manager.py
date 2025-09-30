@@ -138,25 +138,23 @@ class ConversationManager:
         else:
             raise ValueError(f"Conversation {conversation_id} not found")
     
-    def get_context_for_genie(self, conversation_id: str, context_limit: int = 5) -> str:
-        """Get recent conversation context for Genie to maintain conversational flow"""
-        messages = self.get_conversation_history(conversation_id, limit=context_limit * 2)
+    def set_genie_conversation_id(self, conversation_id: str, genie_conversation_id: str):
+        """Set the Genie conversation ID for API continuity"""
+        if conversation_id not in self.conversations:
+            raise ValueError(f"Conversation {conversation_id} not found")
         
-        context_parts = []
-        for msg in messages[-context_limit:]:  # Get last N messages for context
-            if msg.type == 'user':
-                context_parts.append(f"User: {msg.content}")
-            elif msg.type in ['assistant_text', 'assistant_chart']:
-                # For chart responses, include the summary from metadata
-                if msg.metadata and 'ai_summary' in msg.metadata:
-                    context_parts.append(f"Assistant: {msg.metadata['ai_summary']}")
-                else:
-                    context_parts.append(f"Assistant: {msg.content[:200]}...")
+        self.conversations[conversation_id].genie_conversation_id = genie_conversation_id
+        self.conversations[conversation_id].updated_at = datetime.now(timezone.utc).isoformat()
+        logger.info(f"Set Genie conversation ID {genie_conversation_id} for conversation {conversation_id}")
+    
+    def get_genie_conversation_id(self, conversation_id: str) -> Optional[str]:
+        """Get the Genie conversation ID for this conversation"""
+        if conversation_id not in self.conversations:
+            raise ValueError(f"Conversation {conversation_id} not found")
         
-        if context_parts:
-            return "Previous conversation context:\n" + "\n".join(context_parts) + "\n\nCurrent question:"
-        
-        return ""
+        return self.conversations[conversation_id].genie_conversation_id
+    
+    # Note: Context building is no longer needed as we use Genie's native conversation APIs
 
 
 # Global conversation manager instance
