@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ConversationList from './components/ConversationList';
 import ChatInterface from './components/ChatInterface';
-import { Conversation, ConversationSummary } from './types';
+import { Conversation, ConversationSummary, Message } from './types';
 import './App.css';
 
 // Configure axios to include credentials for session management
@@ -109,10 +109,33 @@ const App: React.FC = () => {
 
     const conversationId = activeConversation.id;
 
+    // Create user message for immediate display and error cleanup
+    const userMessage: Message = {
+      id: `temp-${Date.now()}`, // Temporary ID
+      conversation_id: conversationId,
+      type: 'user',
+      content: message,
+      timestamp: new Date().toISOString(),
+      metadata: undefined
+    };
+
     try {
-      // Set loading state for this specific conversation
-      setConversationLoadingStates(prev => ({ ...prev, [conversationId]: true }));
       setError(null);
+
+      // Immediately add user message to the conversation UI
+      setActiveConversation(prev => {
+        if (prev && prev.id === conversationId) {
+          return {
+            ...prev,
+            messages: [...prev.messages, userMessage],
+            updated_at: userMessage.timestamp
+          };
+        }
+        return prev;
+      });
+
+      // Set loading state AFTER showing the user message
+      setConversationLoadingStates(prev => ({ ...prev, [conversationId]: true }));
 
       // Submit message to queue
       const response = await axios.post(
@@ -127,6 +150,16 @@ const App: React.FC = () => {
         await pollForMessageCompletion(messageId, conversationId);
       } else {
         setError('Failed to queue message');
+        // Remove the temporary user message on error
+        setActiveConversation(prev => {
+          if (prev && prev.id === conversationId) {
+            return {
+              ...prev,
+              messages: prev.messages.filter(msg => msg.id !== userMessage.id)
+            };
+          }
+          return prev;
+        });
       }
     } catch (err: any) {
       if (err.response?.data?.error) {
@@ -137,6 +170,18 @@ const App: React.FC = () => {
         setError('An unexpected error occurred');
       }
       console.error('Failed to send message:', err);
+      
+      // Remove the temporary user message on error
+      setActiveConversation(prev => {
+        if (prev && prev.id === conversationId) {
+          return {
+            ...prev,
+            messages: prev.messages.filter(msg => msg.id !== userMessage.id)
+          };
+        }
+        return prev;
+      });
+      
       // Clear loading state on error
       setConversationLoadingStates(prev => ({ ...prev, [conversationId]: false }));
     }

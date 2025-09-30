@@ -157,6 +157,13 @@
   position: relative;
   padding: 20px;
   background: white;
+  height: 400px; /* Fixed height for consistent sizing */
+  max-height: 400px;
+}
+
+/* Chart canvas container */
+.chart-container canvas {
+  max-height: 360px !important; /* Ensure chart fits within container */
 }
 
 .mock-data-badge {
