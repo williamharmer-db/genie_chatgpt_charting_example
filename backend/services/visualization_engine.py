@@ -59,6 +59,7 @@ class VisualizationEngine:
                     },
                     "options": {
                         "responsive": True,
+                        "maintainAspectRatio": False,
                         "plugins": {
                             "title": {
                                 "display": True,
@@ -91,6 +92,7 @@ class VisualizationEngine:
                     },
                     "options": {
                         "responsive": True,
+                        "maintainAspectRatio": False,
                         "plugins": {
                             "title": {
                                 "display": True,
@@ -134,6 +136,7 @@ class VisualizationEngine:
                 },
                 "options": {
                     "responsive": True,
+                    "maintainAspectRatio": False,
                     "plugins": {
                         "title": {
                             "display": True,
@@ -218,6 +221,7 @@ class VisualizationEngine:
         
         options = {
             "responsive": spec.config.get("responsive", True),
+            "maintainAspectRatio": spec.config.get("maintainAspectRatio", False),
             "plugins": {
                 "title": {
                     "display": True,

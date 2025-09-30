@@ -119,15 +119,26 @@ DATASET ANALYSIS:
 - Question: {question}
 - Sample data: {data_sample}
 
+AVAILABLE CHART TYPES:
+Choose from these visualization options:
+- **bar**: Best for comparing categories, rankings, and discrete values
+- **line**: Ideal for trends over time, continuous data, and showing progression
+- **pie**: Perfect for showing parts of a whole, percentages, and composition
+- **doughnut**: Similar to pie chart but with center space for additional info
+- **scatter**: Great for showing relationships between two variables
+- **bubble**: Shows relationships with a third dimension (bubble size)
+- **polarArea**: Radial chart showing data magnitude with angular positioning
+
 TASK: As a data analyst, recommend the most effective chart type for this business question.
 
 Consider these factors:
-1. Data type and structure
+1. Data type and structure (categorical vs. continuous)
 2. Business audience and decision-making context
 3. Visual clarity and impact
 4. Best practices in data visualization
+5. The story you want the data to tell
 
-Recommend ONE chart type (bar, line, or pie) and provide a clear business-focused explanation in 1-2 sentences about why this visualization will best serve stakeholders and drive insights."""
+Recommend ONE chart type from the available options above and provide a clear business-focused explanation in 1-2 sentences about why this visualization will best serve stakeholders and drive insights."""
             
             # Call Azure OpenAI API with enhanced visualization analyst context
             response = self.client.chat.completions.create(
@@ -146,21 +157,37 @@ Recommend ONE chart type (bar, line, or pie) and provide a clear business-focuse
             # Parse the response to extract chart type and reasoning
             response_lower = response_content.lower()
             
-            # Determine chart type from response
-            if 'bar' in response_lower and ('line' not in response_lower or response_lower.index('bar') < response_lower.index('line')):
-                chart_type = "bar"
-            elif 'line' in response_lower and ('pie' not in response_lower or response_lower.index('line') < response_lower.index('pie')):
-                chart_type = "line"
-            elif 'pie' in response_lower:
-                chart_type = "pie"
-            else:
-                # Default fallback based on question analysis
-                if any(word in question.lower() for word in ['top', 'highest', 'best', 'most', 'rank']):
+            # Define all supported chart types in priority order (most specific first)
+            chart_types = [
+                ("doughnut", "doughnut"),
+                ("polararea", "polarArea"), 
+                ("polar area", "polarArea"),
+                ("bubble", "bubble"),
+                ("scatter", "scatter"),
+                ("pie", "pie"),
+                ("bar", "bar"),
+                ("line", "line")
+            ]
+            
+            # Find the first mentioned chart type in the response
+            chart_type = None
+            for search_term, actual_type in chart_types:
+                if search_term in response_lower:
+                    chart_type = actual_type
+                    break
+            
+            # Fallback logic if no chart type is detected
+            if not chart_type:
+                if any(word in question.lower() for word in ['top', 'highest', 'best', 'most', 'rank', 'compare']):
                     chart_type = "bar"
-                elif any(word in question.lower() for word in ['trend', 'over time', 'by month', 'by year']):
-                    chart_type = "line" 
+                elif any(word in question.lower() for word in ['trend', 'over time', 'by month', 'by year', 'change']):
+                    chart_type = "line"
+                elif any(word in question.lower() for word in ['percentage', 'proportion', 'share', 'part of', 'composition']):
+                    chart_type = "pie"
+                elif any(word in question.lower() for word in ['relationship', 'correlation', 'versus', 'vs']):
+                    chart_type = "scatter"
                 else:
-                    chart_type = "bar"
+                    chart_type = "bar"  # Default to bar chart
             
             # Create title from question
             title = question.replace("?", "") if "?" in question else f"Analysis: {question}"
