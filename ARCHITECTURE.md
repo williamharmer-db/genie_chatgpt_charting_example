@@ -34,28 +34,21 @@ genie-to-chart-poc/
 │       ├── __init__.py
 │       └── example_questions.py   # Sample questions for UI
 │
-├── frontend/                       # React TypeScript frontend
-│   ├── build/                     # Production build output
-│   ├── public/                    # Static assets
-│   ├── src/
-│   │   ├── App.tsx                # Main React application
-│   │   ├── App.css                # Global styles
-│   │   ├── components/            # React components
-│   │   │   ├── ChatInterface.tsx  # Main chat interface
-│   │   │   ├── ChatMessage.tsx    # Individual message display
-│   │   │   ├── ConversationList.tsx # Sidebar conversation list
-│   │   │   └── *.css              # Component styles
-│   │   └── types/
-│   │       └── index.ts           # TypeScript type definitions
-│   ├── package.json               # Node.js dependencies
-│   └── tsconfig.json              # TypeScript configuration
-│
-└── scripts/                       # Utility scripts
-    ├── check_azure_deployments.py # Azure OpenAI deployment checker
-    ├── test_setup.py              # Environment setup tester
-    ├── main_demo.py               # Legacy demo script
-    ├── start_demo.sh              # Legacy start script
-    └── start_react_demo.sh        # Legacy React start script
+└── frontend/                       # React TypeScript frontend
+    ├── build/                     # Production build output
+    ├── public/                    # Static assets
+    ├── src/
+    │   ├── App.tsx                # Main React application
+    │   ├── App.css                # Global styles
+    │   ├── components/            # React components
+    │   │   ├── ChatInterface.tsx  # Main chat interface
+    │   │   ├── ChatMessage.tsx    # Individual message display
+    │   │   ├── ConversationList.tsx # Sidebar conversation list
+    │   │   └── *.css              # Component styles
+    │   └── types/
+    │       └── index.ts           # TypeScript type definitions
+    ├── package.json               # Node.js dependencies
+    └── tsconfig.json              # TypeScript configuration
 ```
 
 ## 🔄 Application Flow

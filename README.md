@@ -171,15 +171,8 @@ The application uses a thread-safe message queue system to handle concurrent con
 
 ## 🧪 Testing
 
-### Run Setup Tests
-```bash
-python scripts/test_setup.py
-```
-
-### Check Azure Deployments
-```bash
-python scripts/check_azure_deployments.py
-```
+### Verify Environment Setup
+The application will automatically validate your environment variables on startup. If any required variables are missing, you'll see a clear error message with instructions.
 
 ## 🔄 How It Works
 
@@ -236,8 +229,6 @@ genie-to-chart-poc/
 │   ├── services/         # External service clients
 │   └── utils/            # Utility functions
 ├── frontend/             # React frontend application
-├── scripts/              # Utility scripts and tools
-├── docs/                 # Documentation
 └── requirements.txt      # Python dependencies
 ```
 
