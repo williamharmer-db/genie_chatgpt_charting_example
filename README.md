@@ -42,6 +42,86 @@ backend/
 - Axios (HTTP client)
 - CSS3 (Styling)
 
+### Frontend Architecture
+
+#### Component Hierarchy
+```
+App.tsx (Root Container)
+├── ConversationList.tsx (Sidebar)
+│   └── Individual conversation items
+└── ChatInterface.tsx (Main Chat Area)
+    ├── Message History
+    └── ChatMessage.tsx (Individual Messages)
+        ├── User Messages
+        ├── Assistant Text Responses
+        └── Chart Displays (with Chart.js integration)
+```
+
+#### State Management
+The application uses React's built-in state management with strategic state lifting:
+
+- **Global App State**: Manages conversations list, active conversation, and per-conversation loading states
+- **Conversation-Specific State**: Each conversation tracks its own messages and metadata
+- **Message Queue Integration**: Real-time polling for message status updates
+
+#### Key Frontend Features
+
+**Per-Conversation Loading States:**
+```typescript
+const [conversationLoadingStates, setConversationLoadingStates] = 
+  useState<Record<string, boolean>>({});
+```
+- Prevents global loading states that affect all conversations
+- Each conversation shows loading independently
+- Loading state tied to specific conversation ID
+
+**Message Status Polling:**
+```typescript
+const pollForMessageCompletion = async (messageId: string, conversationId: string) => {
+  // Polls every 1 second for up to 60 seconds
+  // Updates conversation when message completes
+  // Handles timeout and error scenarios
+};
+```
+
+**Chart Integration:**
+- Dynamic Chart.js configuration based on data type
+- Responsive chart sizing and styling
+- Support for multiple chart types (line, bar, pie, etc.)
+- Error fallbacks for chart rendering issues
+
+**API Communication:**
+- Axios-based HTTP client with error handling
+- RESTful API integration with Flask backend
+- Automatic retry logic for failed requests
+- Real-time status checking via polling
+
+#### Component Responsibilities
+
+**App.tsx:**
+- Application-wide state management
+- API communication and error handling
+- Conversation and message lifecycle management
+- Per-conversation loading state coordination
+
+**ConversationList.tsx:**
+- Sidebar conversation management
+- Conversation creation and selection
+- Conversation metadata display
+- Active conversation highlighting
+
+**ChatInterface.tsx:**
+- Message input and submission
+- Message history display
+- Loading state presentation
+- Error message display
+
+**ChatMessage.tsx:**
+- Individual message rendering
+- Chart display integration
+- Message type differentiation (user/assistant/chart)
+- Responsive message layout
+
 ## 📋 Prerequisites
 
 - Python 3.8+
@@ -201,20 +281,15 @@ The application will automatically validate your environment variables on startu
 - **Connection Errors**: Detailed error messages and recovery suggestions
 - **Queue Management**: Failed messages are properly tracked and reported
 
-## 🎨 Frontend Components
+## 🎨 Frontend Features
 
-### Core Components
-- `App.tsx` - Main application container
-- `ChatInterface.tsx` - Chat conversation interface
-- `ConversationList.tsx` - Sidebar conversation management
-- `ChatMessage.tsx` - Individual message display
-- `ChartDisplay.tsx` - Chart rendering component
-
-### Key Features
+### User Experience
 - **Per-conversation Loading States**: Loading indicators only appear in active conversations
-- **Real-time Polling**: Automatic status checking for queued messages
+- **Real-time Polling**: Automatic status checking for queued messages  
 - **Responsive Design**: Works on desktop and mobile devices
 - **Error Display**: User-friendly error messages and recovery options
+- **Intuitive Navigation**: Sidebar conversation switching with persistent state
+- **Interactive Charts**: Hover effects, tooltips, and responsive resizing
 
 ## 🔧 Development
 
