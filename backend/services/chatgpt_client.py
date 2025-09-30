@@ -32,7 +32,8 @@ class ChatGPTClient:
         self.client = AzureOpenAI(
             azure_endpoint=azure_endpoint or settings.azure_openai_endpoint,
             api_key=azure_api_key or settings.azure_openai_api_key,
-            api_version=settings.azure_openai_api_version
+            api_version=settings.azure_openai_api_version,
+            timeout=30.0  # 30 second timeout
         )
         self.model = azure_deployment or settings.azure_openai_deployment
         logger.info(f"Using Azure OpenAI with deployment: {self.model}")
@@ -47,7 +48,7 @@ class ChatGPTClient:
         Get a data summary from Azure OpenAI GPT-5
         """
         try:
-            logger.info("Getting data summary from Azure OpenAI GPT-5")
+            logger.info(f"Getting data summary from Azure OpenAI {self.model}")
             
             # Prepare data sample for analysis (limit to first 10 rows for summary)
             data_sample = data[:10] if len(data) > 10 else data
@@ -104,7 +105,7 @@ Write your analysis in a professional, actionable tone that would be suitable fo
         Get visualization recommendation from Azure OpenAI GPT-5
         """
         try:
-            logger.info("Getting visualization recommendation from Azure OpenAI GPT-5")
+            logger.info(f"Getting visualization recommendation from Azure OpenAI {self.model}")
             
             # Prepare data sample for analysis (limit to first 5 rows for GPT-5)
             data_sample = data[:5] if len(data) > 5 else data
