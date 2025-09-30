@@ -126,28 +126,4 @@ export interface ChatInterfaceProps {
   loading: boolean;
 }
 
-export interface ChartComponentProps {
-  data: GenieChartResult;
-  showDetailsToggle?: boolean;
-  sqlQuery?: string;
-  dataDetails?: {
-    columns: string[];
-    row_count: number;
-    sample_data: any[][];
-    ai_summary: string;
-  };
-  chartReasoning?: string;
-  chartType?: string;
-  chartLibrary?: string;
-}
-
-export interface QueryFormProps {
-  onQuery: (question: string) => void;
-  loading: boolean;
-  conversationMode?: boolean;
-}
-
-export interface ExampleQuestion {
-  text: string;
-  description: string;
-}
+// Removed unused component prop types - functionality moved to ChatMessage component

@@ -5,64 +5,12 @@ This module handles conversation sessions, message history, and context manageme
 for continuous conversations with Databricks Genie.
 """
 
-import json
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, asdict
 from loguru import logger
 
-
-@dataclass
-class Message:
-    """Represents a single message in a conversation"""
-    id: str
-    conversation_id: str
-    type: str  # 'user', 'assistant_text', 'assistant_chart', 'assistant_error'
-    content: str
-    timestamp: str
-    metadata: Optional[Dict[str, Any]] = None
-    
-    def to_dict(self) -> Dict[str, Any]:
-        return asdict(self)
-    
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'Message':
-        return cls(**data)
-
-
-@dataclass
-class Conversation:
-    """Represents a complete conversation with Genie"""
-    id: str
-    title: str
-    created_at: str
-    updated_at: str
-    messages: List[Message]
-    is_active: bool = True
-    
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            'id': self.id,
-            'title': self.title,
-            'created_at': self.created_at,
-            'updated_at': self.updated_at,
-            'is_active': self.is_active,
-            'messages': [msg.to_dict() for msg in self.messages],
-            'message_count': len(self.messages)
-        }
-    
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'Conversation':
-        messages = [Message.from_dict(msg) for msg in data.get('messages', [])]
-        return cls(
-            id=data['id'],
-            title=data['title'],
-            created_at=data['created_at'],
-            updated_at=data['updated_at'],
-            is_active=data.get('is_active', True),
-            messages=messages
-        )
+from ..models.conversation import Message, Conversation
 
 
 class ConversationManager:

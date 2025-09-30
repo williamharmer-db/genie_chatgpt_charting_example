@@ -1,10 +1,26 @@
-databricks-sdk>=0.18.0
-openai>=1.0.0
-python-dotenv>=1.0.0
-pydantic>=2.0.0
-pydantic-settings>=2.0.0
-loguru>=0.7.0
-tenacity>=8.0.0
-flask>=3.0.0
-flask-cors>=4.0.0
+# Genie to Chart POC - Python Dependencies
 
+# Web Framework
+Flask==2.3.3
+Flask-CORS==4.0.0
+
+# Databricks Integration
+databricks-sdk==0.8.0
+
+# Azure OpenAI Integration
+openai==0.28.1
+
+# Configuration Management
+pydantic==2.4.2
+pydantic-settings==2.0.3
+python-dotenv==1.0.0
+
+# Logging
+loguru==0.7.2
+
+# HTTP and Data Processing
+requests==2.31.0
+
+# Development and Testing (optional)
+pytest==7.4.2
+pytest-cov==4.1.0

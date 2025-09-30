@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.errors import DatabricksError
 from loguru import logger
-from config import settings
+from ..core.config import settings
 
 
 @dataclass

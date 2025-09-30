@@ -1,305 +1,301 @@
 # Genie to Chart POC
 
-A proof of concept that demonstrates the complete flow from data query to interactive visualization:
+A conversational data analysis application that combines Databricks Genie with Azure OpenAI to provide intelligent chart generation and insights through natural language queries.
 
-1. **📊 Query Databricks Genie API** - Ask natural language questions about your data
-2. **🔵 Azure OpenAI Visualization Recommendations** - GPT analyzes the data and suggests the best chart type
-3. **📈 Interactive React Charts** - Generate react-chartjs-2 components for beautiful, interactive visualizations
+## 🚀 Overview
 
-## 🎯 What This POC Demonstrates
+This application provides a chat-based interface for data analysis where users can ask questions in natural language and receive both intelligent visualizations and AI-powered insights. The system uses Databricks Genie for data querying and Azure OpenAI for generating summaries and visualization recommendations.
 
-- **Seamless Data-to-Viz Pipeline**: From natural language query to interactive chart in seconds
-- **AI-Driven Visualization**: ChatGPT intelligently chooses the best chart type based on data characteristics
-- **Modern React Frontend**: TypeScript + react-chartjs-2 for professional, responsive UI
-- **Production-Ready Components**: Modular, well-structured code that can be extended
-- **Multiple Interfaces**: CLI demo, vanilla web app, and modern React application
+### Key Features
 
-## 🚀 Quick Start
+- **Conversational Interface**: Ask questions about your data in plain English
+- **Intelligent Visualizations**: Automatic chart generation with AI-powered recommendations
+- **Concurrent Processing**: Queue-based message processing for handling multiple conversations
+- **Real-time Updates**: Live status tracking and polling for message completion
+- **Session Management**: Persistent conversations with message history
+- **Error Handling**: Graceful error handling with fallback to mock data for demos
 
-### 1. Install Dependencies
+## 🏗️ Architecture
 
+### Backend Structure
+```
+backend/
+├── api/           # REST API endpoints and route handlers
+├── core/          # Core business logic and configuration
+├── models/        # Data models and schemas
+├── services/      # External service integrations
+└── utils/         # Utility functions and helpers
+```
+
+### Technology Stack
+
+**Backend:**
+- Flask (Web framework)
+- Databricks SDK (Data querying)
+- Azure OpenAI (AI insights and recommendations)
+- Threading (Concurrent message processing)
+- Loguru (Logging)
+
+**Frontend:**
+- React with TypeScript
+- Chart.js (Data visualization)
+- Axios (HTTP client)
+- CSS3 (Styling)
+
+## 📋 Prerequisites
+
+- Python 3.8+
+- Node.js 16+
+- npm or yarn
+- Databricks workspace with Genie enabled
+- Azure OpenAI account
+
+## 🛠️ Installation
+
+### 1. Clone the Repository
+```bash
+git clone <repository-url>
+cd genie-to-chart-poc
+```
+
+### 2. Backend Setup
+
+#### Install Python Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Configure Environment
-
-Copy the example environment file and add your credentials:
-
-```bash
-cp env_template .env
-```
-
-Edit `.env` with your actual credentials:
-
+#### Environment Configuration
+Create a `.env` file in the root directory:
 ```bash
 # Databricks Configuration
-DATABRICKS_HOST=https://your-workspace.cloud.databricks.com
-DATABRICKS_TOKEN=your-personal-access-token
-GENIE_SPACE_ID=your-genie-space-id  # Optional - will auto-detect
+DATABRICKS_HOST=https://your-workspace.cloud.databricks.com/
+DATABRICKS_TOKEN=your-databricks-token
+GENIE_SPACE_ID=your-genie-space-id  # Optional
 
 # Azure OpenAI Configuration
-AZURE_OPENAI_ENDPOINT=https://your-resource-name.openai.azure.com/
-AZURE_OPENAI_API_KEY=your-azure-openai-api-key
+AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
+AZURE_OPENAI_API_KEY=your-api-key
 AZURE_OPENAI_DEPLOYMENT=your-deployment-name
-AZURE_OPENAI_API_VERSION=2024-02-01
+AZURE_OPENAI_API_VERSION=2024-06-01
+
+# Optional: Queue Configuration
+MAX_QUEUE_WORKERS=2
+MAX_QUEUE_SIZE=50
+
+# Optional: Rate Limiting
+MAX_RETRIES=3
+INITIAL_BACKOFF=1.0
+MAX_BACKOFF=60.0
+BACKOFF_MULTIPLIER=2.0
 ```
 
+### 3. Frontend Setup
 
-### 3. Choose Your Demo Mode
-
-#### Option A: React Application (Recommended) 🌟
+#### Install Dependencies
 ```bash
-./start_react_demo.sh
+cd frontend
+npm install
 ```
-This builds and serves the React frontend with react-chartjs-2 charts.
 
-#### Option B: Development Mode 
+#### Build Frontend
 ```bash
-./dev_mode.sh
+npm run build
 ```
-Runs both Flask API (port 5000) and React dev server (port 3000) for development.
 
-#### Option C: Build from Scratch
+## 🚀 Running the Application
+
+### Development Mode
+
+#### Start Backend Server
 ```bash
-./build.sh        # Build the React frontend
-python web_app.py  # Start the Flask server
+python app.py
 ```
 
-#### Option D: Command Line Demo
+#### Start Frontend Development Server (Optional)
 ```bash
-python main_demo.py
+cd frontend
+npm start
 ```
 
-#### Option E: Legacy Web Interface
+### Production Mode
 ```bash
-python web_app.py
-```
-(Serves React build if available, otherwise shows build instructions)
-
-## 🌟 Features
-
-### 📊 Data Querying
-- Uses the proven Databricks Genie client from the existing `genie_conversation_api` project
-- Handles rate limiting with exponential backoff
-- Fetches actual query results, not just SQL
-
-### 🤖 AI Visualization Recommendations  
-- ChatGPT analyzes your data structure and original question
-- Recommends optimal chart types (bar, line, pie, scatter, etc.)
-- Provides reasoning for visualization choices
-- Handles multiple data formats and edge cases
-
-### 📈 Interactive React Charts
-- **react-chartjs-2** components for modern, responsive charts
-- **TypeScript** for type safety and better development experience
-- **Component-based architecture** for reusability and maintainability
-- Beautiful, responsive charts that work on all devices
-- Supports all major chart types with smooth animations
-- Real-time data updates and interactive tooltips
-
-### 🌐 Modern Web Interface
-- **React + TypeScript** frontend with modern design
-- **Flask API** backend serving both API and React build
-- **CORS-enabled** for development flexibility
-- Real-time query processing with loading states
-- Example questions to get started
-- Complete data pipeline visualization
-- Responsive design for mobile and desktop
-
-## 📁 Project Structure
-
-```
-genie-to-chart-poc/
-├── config.py              # Configuration management
-├── genie_client.py         # Simplified Databricks Genie client  
-├── chatgpt_client.py       # OpenAI client for visualization recommendations
-├── visualization_engine.py # Chart.js configuration generator
-├── main_demo.py           # Command line demo script
-├── web_app.py             # Flask web application with React serving
-├── frontend/              # React TypeScript application
-│   ├── src/
-│   │   ├── components/    # React components
-│   │   │   ├── ChartDisplay.tsx     # react-chartjs-2 chart component
-│   │   │   ├── QueryForm.tsx        # Query input form
-│   │   │   ├── LoadingSpinner.tsx   # Loading animation
-│   │   │   └── ErrorDisplay.tsx     # Error handling
-│   │   ├── types/         # TypeScript type definitions
-│   │   └── App.tsx        # Main React application
-│   ├── package.json       # Node.js dependencies
-│   └── build/             # Production build (created by npm run build)
-├── templates/
-│   └── index.html         # Legacy web interface
-├── build.sh               # Build script for React frontend
-├── start_react_demo.sh    # Start production React app
-├── dev_mode.sh           # Development mode (Flask + React dev server)
-├── start_demo.sh         # Original demo launcher
-├── requirements.txt       # Python dependencies
-├── env_template          # Environment configuration template
-└── README.md             # This file
+python app.py
 ```
 
-## 🔧 Architecture
+The application will be available at `http://localhost:5000`
 
-### Data Flow
-1. **User Question** → Natural language query (e.g., "What are the top 5 products by sales?")
-2. **Genie API** → Converts to SQL and executes against your data
-3. **Data Processing** → Extracts structured results (columns, rows, data types)
-4. **ChatGPT Analysis** → Analyzes data and recommends visualization approach
-5. **Chart Generation** → Creates Chart.js configuration
-6. **Visualization** → Renders interactive chart in browser
+## 🔧 Configuration
 
-### Key Components
+### Environment Variables
 
-#### GenieClient
-- Simplified version of the existing Genie conversation API
-- Handles authentication, rate limiting, and result fetching
-- Returns structured `GenieQueryResult` objects
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `DATABRICKS_HOST` | Yes | - | Your Databricks workspace URL |
+| `DATABRICKS_TOKEN` | Yes | - | Databricks personal access token |
+| `GENIE_SPACE_ID` | No | - | Specific Genie space ID (uses first available if not set) |
+| `AZURE_OPENAI_ENDPOINT` | Yes | - | Azure OpenAI service endpoint |
+| `AZURE_OPENAI_API_KEY` | Yes | - | Azure OpenAI API key |
+| `AZURE_OPENAI_DEPLOYMENT` | Yes | - | Azure OpenAI deployment name |
+| `AZURE_OPENAI_API_VERSION` | No | 2024-06-01 | Azure OpenAI API version |
+| `MAX_QUEUE_WORKERS` | No | 2 | Number of concurrent message processing workers |
+| `MAX_QUEUE_SIZE` | No | 50 | Maximum queue size for pending messages |
 
-#### ChatGPTClient  
-- Sends data structure and context to GPT-4
-- Receives structured chart specifications
-- Includes fallback logic for robust operation
+### Queue System
 
-#### VisualizationEngine
-- Converts AI recommendations to Chart.js configurations
-- Generates complete HTML pages with charts
-- Handles multiple chart types and styling
+The application uses a thread-safe message queue system to handle concurrent conversations:
 
-## 🎯 Example Usage
+- **Concurrent Workers**: Process multiple messages simultaneously
+- **Status Tracking**: Real-time status updates (queued → processing → completed/failed)
+- **Error Isolation**: Failures in one conversation don't affect others
+- **Rate Limiting Protection**: Built-in exponential backoff for API calls
 
-### Web Interface
-1. Open http://localhost:5000
-2. Enter a question like "Show me revenue by product category"
-3. Watch as the system:
-   - Queries your Databricks data
-   - Gets AI visualization recommendations
-   - Generates an interactive chart
-   - Displays SQL, data preview, and reasoning
+## 📡 API Endpoints
 
-### Command Line
-```python
-from main_demo import GenieToChartPOC
+### Health & Status
+- `GET /api/health` - Health check and queue status
+- `GET /api/queue/status` - Detailed queue information
 
-poc = GenieToChartPOC()
-html_file = poc.run_demo("What are the top 10 customers by total orders?")
-# Opens chart in browser automatically
+### Conversations
+- `GET /api/conversations` - List all conversations
+- `POST /api/conversations` - Create new conversation
+- `GET /api/conversations/{id}` - Get specific conversation
+- `DELETE /api/conversations/{id}` - Delete conversation
+
+### Messages
+- `POST /api/conversations/{id}/messages` - Send message (returns queue ID)
+- `GET /api/messages/{id}/status` - Check message processing status
+
+### Utilities
+- `GET /api/examples` - Get example questions
+
+## 🧪 Testing
+
+### Run Setup Tests
+```bash
+python scripts/test_setup.py
 ```
+
+### Check Azure Deployments
+```bash
+python scripts/check_azure_deployments.py
+```
+
+## 🔄 How It Works
+
+1. **User Input**: User types a natural language question about their data
+2. **Queue Processing**: Message is added to the processing queue and assigned a unique ID
+3. **Context Building**: System builds conversational context from previous messages
+4. **Genie Query**: Enhanced question is sent to Databricks Genie for data retrieval
+5. **AI Analysis**: Azure OpenAI analyzes the data and provides insights
+6. **Chart Generation**: System creates appropriate visualizations based on data type
+7. **Response Delivery**: User receives charts, insights, and explanations
+8. **Status Updates**: Frontend polls for completion and displays results
+
+## 📊 Supported Chart Types
+
+- Bar Charts (vertical/horizontal)
+- Line Charts (single/multiple series)
+- Pie Charts
+- Doughnut Charts
+- Scatter Plots
+- Area Charts
 
 ## 🛡️ Error Handling
 
-The POC includes robust error handling for:
-- **API Rate Limits**: Exponential backoff for both Databricks and OpenAI
-- **Network Issues**: Retry logic and graceful degradation
-- **Data Edge Cases**: Fallback chart types when AI analysis fails
-- **Configuration Errors**: Clear error messages for missing credentials
+- **Graceful Degradation**: Falls back to mock data for demonstrations
+- **Rate Limiting**: Automatic retry with exponential backoff
+- **Connection Errors**: Detailed error messages and recovery suggestions
+- **Queue Management**: Failed messages are properly tracked and reported
 
-## 🔍 Key Implementation Details
+## 🎨 Frontend Components
 
-### Genie Integration
-```python
-# Query data using natural language
-result = genie_client.query_data("What are the top 5 products by sales?")
-# Returns: SQL query + structured data + column information
+### Core Components
+- `App.tsx` - Main application container
+- `ChatInterface.tsx` - Chat conversation interface
+- `ConversationList.tsx` - Sidebar conversation management
+- `ChatMessage.tsx` - Individual message display
+- `ChartDisplay.tsx` - Chart rendering component
+
+### Key Features
+- **Per-conversation Loading States**: Loading indicators only appear in active conversations
+- **Real-time Polling**: Automatic status checking for queued messages
+- **Responsive Design**: Works on desktop and mobile devices
+- **Error Display**: User-friendly error messages and recovery options
+
+## 🔧 Development
+
+### Project Structure
+```
+genie-to-chart-poc/
+├── app.py                 # Main application entry point
+├── backend/               # Backend Python modules
+│   ├── api/              # REST API routes
+│   ├── core/             # Core business logic
+│   ├── models/           # Data models
+│   ├── services/         # External service clients
+│   └── utils/            # Utility functions
+├── frontend/             # React frontend application
+├── scripts/              # Utility scripts and tools
+├── docs/                 # Documentation
+└── requirements.txt      # Python dependencies
 ```
 
-### AI Visualization  
-```python
-# Get AI recommendation for chart type
-chart_spec = chatgpt_client.recommend_visualization(
-    data=result.data,
-    columns=result.columns, 
-    question="What are the top 5 products by sales?",
-    sql_query=result.sql_query
-)
-# Returns: Chart type, configuration, and reasoning
-```
+### Adding New Features
 
-### Chart Generation
-```python
-# Generate interactive Chart.js configuration
-chart_config = viz_engine.generate_chartjs_config(chart_spec)
-# Returns: Complete Chart.js config ready for rendering
-```
+1. **Backend Changes**: Add new routes in `backend/api/routes.py`
+2. **Frontend Changes**: Create components in `frontend/src/components/`
+3. **Models**: Define data structures in `backend/models/`
+4. **Services**: Add external integrations in `backend/services/`
 
-## 🎨 Customization
+## 🤝 Contributing
 
-### Adding New Chart Types
-1. Update `ChatGPTClient` prompt to include new chart types
-2. Add chart type handling in `VisualizationEngine._prepare_chartjs_data()`
-3. Update web interface chart type display
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/new-feature`)
+3. Commit your changes (`git commit -am 'Add new feature'`)
+4. Push to the branch (`git push origin feature/new-feature`)
+5. Open a Pull Request
 
-### Extending Data Sources
-1. Create new client classes following the `GenieClient` pattern
-2. Implement `query_data()` method returning `GenieQueryResult`
-3. Update main demo to support multiple data sources
+## 📝 License
 
-### Custom AI Models
-1. Replace OpenAI client in `ChatGPTClient`
-2. Adjust prompts for different model capabilities
-3. Update fallback logic as needed
-
-## 🤝 Integration with Existing Project
-
-This POC builds on the `genie_conversation_api` project:
-
-- **Reuses**: Authentication, rate limiting, Genie SDK integration
-- **Simplifies**: Removes conversation management for single-query use case  
-- **Extends**: Adds AI visualization and Chart.js generation
-
-The simplified `GenieClient` can easily be replaced with the full conversation API for more complex use cases.
-
-## 🎉 Demo Results
-
-The POC successfully demonstrates:
-
-✅ **Natural Language to SQL**: "Show me top products" → `SELECT ProductName, SUM(Sales) FROM...`  
-✅ **AI Chart Selection**: Automatically chooses bar chart for ranked categorical data  
-✅ **Interactive Visualization**: Beautiful Chart.js charts with hover effects and legends  
-✅ **Complete Pipeline**: End-to-end flow in under 30 seconds  
-✅ **Error Resilience**: Graceful handling of API limits and edge cases
-
-## 🔮 Next Steps
-
-For production deployment:
-
-1. **Caching**: Add Redis/database caching for repeated queries
-2. **Authentication**: Add user authentication and workspace isolation  
-3. **Scaling**: Deploy with gunicorn/uwsgi for production traffic
-4. **Monitoring**: Add logging, metrics, and health checks
-5. **Chart Library Options**: Support for D3.js, Plotly, or other libraries
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## 🆘 Troubleshooting
 
 ### Common Issues
 
-**Missing Environment Variables**
-```bash
-❌ Missing required environment variables: DATABRICKS_TOKEN
-```
-→ Check your `.env` file has all required variables
+**Environment Variables Not Loading**
+- Ensure `.env` file is in the root directory
+- Check for typos in variable names
+- Verify no extra spaces around values
 
-**Genie Space Not Found**  
-```bash
-❌ No Genie spaces found
-```
-→ Ensure you have access to at least one Genie space in your Databricks workspace
+**Databricks Connection Issues**
+- Verify your workspace URL format
+- Check that your personal access token has sufficient permissions
+- Ensure Genie is enabled in your workspace
 
-**OpenAI API Errors**
-```bash
-❌ OpenAI API rate limit exceeded
-```
-→ The system will automatically retry with backoff
+**Azure OpenAI Connection Issues**
+- Verify your endpoint URL is correct
+- Check that your deployment name matches the configured model
+- Ensure your API key has not expired
 
-**No Data Returned**
-```bash
-❌ No data returned from Genie query  
-```
-→ Try rephrasing your question or check data availability
+**Queue Processing Issues**
+- Check queue status at `/api/queue/status`
+- Monitor application logs for error details
+- Restart the application to reset the queue
 
-### Health Check
-Visit `/api/health` to verify system configuration and connectivity.
+### Getting Help
 
-## 📞 Support
+- Check the application logs for detailed error messages
+- Use the health check endpoint (`/api/health`) to verify system status
+- Review the troubleshooting section above
+- Open an issue on the repository for persistent problems
 
-This POC demonstrates the core concept and provides a foundation for production implementation. The modular architecture makes it easy to extend and customize for specific use cases.
+## 🎯 Future Enhancements
+
+- WebSocket support for real-time updates
+- Multi-user support with authentication
+- Advanced chart customization options
+- Export functionality for charts and data
+- Integration with additional data sources
+- Dashboard creation and sharing capabilities

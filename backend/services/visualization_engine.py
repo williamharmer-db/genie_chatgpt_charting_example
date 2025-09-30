@@ -5,7 +5,7 @@ import json
 from typing import Dict, List, Any
 from dataclasses import asdict
 from loguru import logger
-from chatgpt_client import ChartSpecification
+from .chatgpt_client import ChartSpecification
 
 
 class VisualizationEngine:

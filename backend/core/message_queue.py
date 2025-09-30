@@ -5,39 +5,15 @@ This module provides a queuing system to handle concurrent message processing
 from different conversations, preventing conflicts and connection issues.
 """
 
-import asyncio
 import time
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, Optional, Any, Callable
-from dataclasses import dataclass
-from enum import Enum
 from loguru import logger
 import threading
 from queue import Queue, Empty
 
-
-class MessageStatus(Enum):
-    QUEUED = "queued"
-    PROCESSING = "processing"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    CANCELLED = "cancelled"
-
-
-@dataclass
-class QueuedMessage:
-    """Represents a message in the processing queue"""
-    id: str
-    conversation_id: str
-    session_id: str
-    user_message: str
-    timestamp: str
-    status: MessageStatus
-    result: Optional[Dict[str, Any]] = None
-    error: Optional[str] = None
-    processing_started_at: Optional[str] = None
-    processing_completed_at: Optional[str] = None
+from ..models.conversation import MessageStatus, QueuedMessage
 
 
 class MessageQueue:

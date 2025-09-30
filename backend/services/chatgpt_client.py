@@ -6,7 +6,7 @@ from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from openai import AzureOpenAI
 from loguru import logger
-from config import settings
+from ..core.config import settings
 
 
 @dataclass
