@@ -2,19 +2,19 @@ command: ['python', 'app.py']
 env:
   # Databricks Configuration
   - name: 'GENIE_DATABRICKS_HOST'
-    valueFrom: 'databricks-host-secret'
+    value: 'databricks-host-secret'
   - name: 'GENIE_DATABRICKS_TOKEN'
-    valueFrom: 'databricks-token-secret'
+    value: 'databricks-token-secret'
   - name: 'GENIE_SPACE_ID'
-    valueFrom: 'genie-space-id-secret'
+    value: 'genie-space-id-secret'
   
   # Azure OpenAI Configuration
   - name: 'AZURE_OPENAI_ENDPOINT'
-    valueFrom: 'azure-openai-endpoint-secret'
+    value: 'azure-openai-endpoint-secret'
   - name: 'AZURE_OPENAI_API_KEY'
-    valueFrom: 'azure-openai-key-secret'
+    value: 'azure-openai-key-secret'
   - name: 'AZURE_OPENAI_DEPLOYMENT'
-    valueFrom: 'azure-openai-deployment-secret'
+    value: 'azure-openai-deployment-secret'
   - name: 'AZURE_OPENAI_API_VERSION'
     value: '2024-06-01'
   

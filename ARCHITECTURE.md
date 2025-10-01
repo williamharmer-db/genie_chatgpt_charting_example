@@ -83,7 +83,7 @@ User Input → Queue → Worker Thread → Genie → AI Analysis → Chart Gener
 - Status polling endpoints
 - Error handling and recovery
 
-## 🚀 Key Improvements Made
+## 🚀 Key Parts of this example
 
 ### 1. **Organized Structure**
 - Clear separation of concerns
@@ -102,13 +102,13 @@ User Input → Queue → Worker Thread → Genie → AI Analysis → Chart Gener
 - No cross-conversation UI interference
 - Better user experience
 
-### 4. **Improved Error Handling**
+### 4. **Error Handling**
 - Comprehensive error tracking
 - Graceful degradation to mock data
 - User-friendly error messages
 - Automatic retry mechanisms
 
-### 5. **Better Documentation**
+### 5. **Documentation**
 - Comprehensive README
 - Inline code documentation
 - Architecture overview
@@ -119,7 +119,7 @@ User Input → Queue → Worker Thread → Genie → AI Analysis → Chart Gener
 ### Environment Variables
 All configuration is managed through environment variables with sensible defaults:
 
-- **Databricks**: `DATABRICKS_HOST`, `DATABRICKS_TOKEN`, `GENIE_SPACE_ID`
+- **Databricks**: `GENIE_DATABRICKS_HOST`, `GENIE_DATABRICKS_TOKEN`, `GENIE_SPACE_ID`
 - **Azure OpenAI**: `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_DEPLOYMENT`
 - **Queue Settings**: `MAX_QUEUE_WORKERS`, `MAX_QUEUE_SIZE`
 - **Rate Limiting**: `MAX_RETRIES`, `INITIAL_BACKOFF`, `MAX_BACKOFF`

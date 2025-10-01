@@ -52,9 +52,9 @@ def check_environment() -> bool:
     Returns:
         bool: True if all required variables are present, False otherwise
     """
+    # Only Azure OpenAI variables are required
+    # Databricks variables are optional (can use default authentication)
     required_vars = [
-        "DATABRICKS_HOST", 
-        "DATABRICKS_TOKEN", 
         "AZURE_OPENAI_ENDPOINT", 
         "AZURE_OPENAI_API_KEY", 
         "AZURE_OPENAI_DEPLOYMENT"
