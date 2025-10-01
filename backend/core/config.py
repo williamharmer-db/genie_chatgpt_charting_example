@@ -15,8 +15,8 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables"""
     
     # Databricks Configuration
-    databricks_host: str = Field(..., env="DATABRICKS_HOST")
-    databricks_token: str = Field(..., env="DATABRICKS_TOKEN")
+    databricks_host: Optional[str] = Field(default=None, env="GENIE_DATABRICKS_HOST")
+    databricks_token: Optional[str] = Field(default=None, env="GENIE_DATABRICKS_TOKEN")
     genie_space_id: Optional[str] = Field(default=None, env="GENIE_SPACE_ID")
     
     # Azure OpenAI Configuration

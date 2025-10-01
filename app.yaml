@@ -1,0 +1,43 @@
+command: ['python', 'app.py']
+env:
+  # Databricks Configuration
+  - name: 'GENIE_DATABRICKS_HOST'
+    valueFrom: 'databricks-host-secret'
+  - name: 'GENIE_DATABRICKS_TOKEN'
+    valueFrom: 'databricks-token-secret'
+  - name: 'GENIE_SPACE_ID'
+    valueFrom: 'genie-space-id-secret'
+  
+  # Azure OpenAI Configuration
+  - name: 'AZURE_OPENAI_ENDPOINT'
+    valueFrom: 'azure-openai-endpoint-secret'
+  - name: 'AZURE_OPENAI_API_KEY'
+    valueFrom: 'azure-openai-key-secret'
+  - name: 'AZURE_OPENAI_DEPLOYMENT'
+    valueFrom: 'azure-openai-deployment-secret'
+  - name: 'AZURE_OPENAI_API_VERSION'
+    value: '2024-06-01'
+  
+  # Application Configuration
+  - name: 'FLASK_ENV'
+    value: 'production'
+  - name: 'PYTHONPATH'
+    value: '/databricks/driver'
+  - name: 'MAX_QUEUE_WORKERS'
+    value: '2'
+  - name: 'MAX_QUEUE_SIZE'
+    value: '50'
+  
+  # Rate Limiting Configuration
+  - name: 'MAX_RETRIES'
+    value: '5'
+  - name: 'INITIAL_BACKOFF'
+    value: '1.0'
+  - name: 'MAX_BACKOFF'
+    value: '60.0'
+  - name: 'BACKOFF_MULTIPLIER'
+    value: '2.0'
+  
+  # Logging Configuration
+  - name: 'LOG_LEVEL'
+    value: 'INFO'

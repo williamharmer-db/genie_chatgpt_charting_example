@@ -149,8 +149,8 @@ pip install -r requirements.txt
 Create a `.env` file in the root directory:
 ```bash
 # Databricks Configuration
-DATABRICKS_HOST=https://your-workspace.cloud.databricks.com/
-DATABRICKS_TOKEN=your-databricks-token
+GENIE_DATABRICKS_HOST=https://your-workspace.cloud.databricks.com/
+GENIE_DATABRICKS_TOKEN=your-databricks-token
 GENIE_SPACE_ID=your-genie-space-id  # Optional
 
 # Azure OpenAI Configuration
@@ -185,7 +185,7 @@ npm run build
 
 ## 🚀 Running the Application
 
-### Development Mode
+### Local Development Mode
 
 #### Start Backend Server
 ```bash
@@ -198,12 +198,25 @@ cd frontend
 npm start
 ```
 
-### Production Mode
+The application will be available at `http://localhost:5000`
+
+### Databricks App Deployment
+
+This application can be deployed as a native Databricks App for production use:
+
 ```bash
-python app.py
+# Deploy to Databricks
+databricks apps deploy genie-chart-app --source-path .
 ```
 
-The application will be available at `http://localhost:5000`
+**Benefits of Databricks deployment:**
+- 🔐 **Native Authentication**: Direct access to Databricks APIs
+- 🚀 **Auto-scaling**: Scales with Databricks infrastructure  
+- 🛡️ **Enterprise Security**: Secure secret management and network isolation
+- 📊 **Built-in Monitoring**: Integrated logging and monitoring
+- 💰 **Cost Efficient**: Pay only for compute resources used
+
+See [DATABRICKS_DEPLOYMENT.md](DATABRICKS_DEPLOYMENT.md) for detailed deployment instructions.
 
 ## 🔧 Configuration
 
@@ -211,8 +224,8 @@ The application will be available at `http://localhost:5000`
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `DATABRICKS_HOST` | Yes | - | Your Databricks workspace URL |
-| `DATABRICKS_TOKEN` | Yes | - | Databricks personal access token |
+| `GENIE_DATABRICKS_HOST` | Yes | - | Your Databricks workspace URL |
+| `GENIE_DATABRICKS_TOKEN` | Yes | - | Databricks personal access token |
 | `GENIE_SPACE_ID` | No | - | Specific Genie space ID (uses first available if not set) |
 | `AZURE_OPENAI_ENDPOINT` | Yes | - | Azure OpenAI service endpoint |
 | `AZURE_OPENAI_API_KEY` | Yes | - | Azure OpenAI API key |

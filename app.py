@@ -36,6 +36,9 @@ def create_app() -> Flask:
     app = Flask(__name__, static_folder='frontend/build', static_url_path='')
     app.secret_key = os.urandom(24)  # For session management
     
+    # Initialize queue system for WSGI deployment
+    initialize_queue_system()
+    
     # Register all API routes
     register_routes(app)
     
@@ -94,8 +97,13 @@ def main():
     if not check_environment():
         sys.exit(1)
     
+    # Determine if running in Databricks environment
+    is_databricks = os.getenv('FLASK_ENV') == 'production' or os.getenv('DATABRICKS_RUNTIME_VERSION')
+    port = 8080 if is_databricks else 5000
+    debug = not is_databricks
+    
     logger.info("🚀 Starting Genie to Chart POC Web App")
-    logger.info(f"📊 Databricks: {os.getenv('DATABRICKS_HOST')}")
+    logger.info(f"📊 Databricks: {os.getenv('GENIE_DATABRICKS_HOST') or 'Using default authentication'}")
     logger.info(f"🤖 OpenAI: Configured")
     
     # Initialize the message queue system
@@ -104,16 +112,22 @@ def main():
     # Create and configure the Flask app
     app = create_app()
     
-    logger.info("🌐 Open http://localhost:5000 in your browser")
+    if is_databricks:
+        logger.info(f"🌐 Running in Databricks Apps environment on port {port}")
+    else:
+        logger.info(f"🌐 Open http://localhost:{port} in your browser")
     
     try:
-        # Run the Flask development server
-        app.run(debug=True, host='0.0.0.0', port=5000)
+        # Run the Flask server
+        app.run(debug=debug, host='0.0.0.0', port=port)
     except KeyboardInterrupt:
         logger.info("Received shutdown signal")
     finally:
         shutdown_queue_system()
 
+
+# Create Flask app instance for Gunicorn (WSGI server)
+app = create_app()
 
 if __name__ == '__main__':
     main()

@@ -1,6 +1,6 @@
 # Databricks Configuration
-DATABRICKS_HOST=https://your-workspace.cloud.databricks.com
-DATABRICKS_TOKEN=your-personal-access-token
+GENIE_DATABRICKS_HOST=https://your-workspace.cloud.databricks.com
+GENIE_DATABRICKS_TOKEN=your-personal-access-token
 GENIE_SPACE_ID=your-genie-space-id
 
 # Azure OpenAI Configuration (alternative to regular OpenAI)

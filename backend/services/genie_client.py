@@ -5,8 +5,12 @@ import time
 import random
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
-from databricks.sdk import WorkspaceClient
-from databricks.sdk.errors import DatabricksError
+from ..utils.databricks_compat import (
+    create_workspace_client, 
+    is_rate_limit_error, 
+    DatabricksError,
+    DATABRICKS_SDK_AVAILABLE
+)
 from loguru import logger
 from ..core.config import settings
 
@@ -24,12 +28,27 @@ class GenieQueryResult:
 class GenieClient:
     """Simplified client for interacting with Databricks Genie"""
     
-    def __init__(self, workspace_client: Optional[WorkspaceClient] = None, space_id: Optional[str] = None):
-        self.workspace_client = workspace_client or WorkspaceClient(
-            host=settings.databricks_host,
-            token=settings.databricks_token
-        )
-        self.space_id = space_id or settings.genie_space_id
+    def __init__(self, workspace_client: Optional[Any] = None, space_id: Optional[str] = None):
+        try:
+            if not DATABRICKS_SDK_AVAILABLE:
+                raise ImportError("Databricks SDK is not available")
+                
+            if workspace_client:
+                self.workspace_client = workspace_client
+                logger.info("Using provided WorkspaceClient")
+            else:
+                # Use the compatibility layer to create the client
+                self.workspace_client = create_workspace_client(
+                    host=settings.databricks_host,
+                    token=settings.databricks_token
+                )
+            
+            self.space_id = space_id or settings.genie_space_id
+            logger.info(f"GenieClient initialized with space_id: {self.space_id}")
+            
+        except Exception as e:
+            logger.error(f"Failed to initialize GenieClient: {e}")
+            raise
         
     def _exponential_backoff(self, func, *args, max_retries: int = None, base_delay: float = None, **kwargs):
         """Execute function with exponential backoff for rate limiting"""
@@ -40,9 +59,9 @@ class GenieClient:
         while retries < max_retries:
             try:
                 return func(*args, **kwargs)
-            except DatabricksError as e:
-                # Check if it's a rate limit error (429)
-                if hasattr(e, 'http_status_code') and e.http_status_code == 429:
+            except Exception as e:
+                # Use the compatibility layer to check for rate limit errors
+                if is_rate_limit_error(e):
                     wait_time = min(
                         base_delay * (settings.backoff_multiplier ** retries),
                         settings.max_backoff
